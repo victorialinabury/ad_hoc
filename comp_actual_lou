@@ -1,0 +1,19 @@
+select
+     count(o.order_id) as order_total
+    ,sum(o.claim_amount_gbp) as claim_amount_gbp_total
+    ,sum(o.order_total_gbp) as order_total_gbp_total
+from(
+
+      select distinct 
+           c.order_id
+          ,sum(c.claim_amount_gbp) as claim_amount_gbp
+          ,sum(c.order_total_gbp) as order_total_gbp
+      from
+           PRODUCTION.DENORMALISED.COMPENSATION_CLAIMS c
+      where 
+          c.claim_time > dateadd(day, -90, current_date())
+          and claim_reason in ('late live order', 'late order request credit') 
+          and c.claim_amount_gbp = 15
+      group by
+          c.order_id
+  ) o
